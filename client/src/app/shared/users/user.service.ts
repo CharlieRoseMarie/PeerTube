@@ -38,6 +38,20 @@ export class UserService {
                )
   }
 
+  changeEmail (password: string, newEmail: string) {
+    const url = UserService.BASE_USERS_URL + 'me'
+    const body: UserUpdateMe = {
+      currentPassword: password,
+      email: newEmail
+    }
+
+    return this.authHttp.put(url, body)
+               .pipe(
+                 map(this.restExtractor.extractDataBool),
+                 catchError(err => this.restExtractor.handleError(err))
+               )
+  }
+
   updateMyProfile (profile: UserUpdateMe) {
     const url = UserService.BASE_USERS_URL + 'me'
 
@@ -104,10 +118,11 @@ export class UserService {
                )
   }
 
-  verifyEmail (userId: number, verificationString: string) {
+  verifyEmail (userId: number, verificationString: string, isPendingEmail: boolean) {
     const url = `${UserService.BASE_USERS_URL}/${userId}/verify-email`
     const body = {
-      verificationString
+      verificationString,
+      isPendingEmail
     }
 
     return this.authHttp.post(url, body)
@@ -134,6 +149,22 @@ export class UserService {
     return this.authHttp
       .get<string[]>(url, { params })
       .pipe(catchError(res => this.restExtractor.handleError(res)))
+  }
+
+  getNewUsername (oldDisplayName: string, newDisplayName: string, currentUsername: string) {
+    // Don't update display name, the user seems to have changed it
+    if (this.displayNameToUsername(oldDisplayName) !== currentUsername) return currentUsername
+
+    return this.displayNameToUsername(newDisplayName)
+  }
+
+  displayNameToUsername (displayName: string) {
+    if (!displayName) return ''
+
+    return displayName
+      .toLowerCase()
+      .replace(/\s/g, '_')
+      .replace(/[^a-z0-9_.]/g, '')
   }
 
   /* ###### Admin methods ###### */

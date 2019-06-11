@@ -379,8 +379,7 @@ describe('Test users API validators', function () {
     it('Should succeed without password change with the correct params', async function () {
       const fields = {
         nsfwPolicy: 'blur',
-        autoPlayVideo: false,
-        email: 'super_email@example.com'
+        autoPlayVideo: false
       }
 
       await makePutBodyRequest({ url: server.url, path: path + 'me', token: userAccessToken, fields, statusCodeExpected: 204 })
@@ -643,6 +642,7 @@ describe('Test users API validators', function () {
     const registrationPath = path + '/register'
     const baseCorrectParams = {
       username: 'user3',
+      displayName: 'super user',
       email: 'test3@example.com',
       password: 'my super password'
     }
@@ -723,6 +723,12 @@ describe('Test users API validators', function () {
         fields,
         statusCodeExpected: 409
       })
+    })
+
+    it('Should fail with a bad display name', async function () {
+      const fields = immutableAssign(baseCorrectParams, { displayName: 'a'.repeat(150) })
+
+      await makePostBodyRequest({ url: server.url, path: registrationPath, token: server.accessToken, fields })
     })
 
     it('Should fail with a bad channel name', async function () {

@@ -73,7 +73,7 @@ function registerUser (url: string, username: string, password: string, specialS
 
 function registerUserWithChannel (options: {
   url: string,
-  user: { username: string, password: string },
+  user: { username: string, password: string, displayName?: string },
   channel: { name: string, displayName: string }
 }) {
   const path = '/api/v1/users/register'
@@ -82,6 +82,10 @@ function registerUserWithChannel (options: {
     password: options.user.password,
     email: options.user.username + '@example.com',
     channel: options.channel
+  }
+
+  if (options.user.displayName) {
+    Object.assign(body, { displayName: options.user.displayName })
   }
 
   return makePostBodyRequest({
@@ -160,12 +164,16 @@ function getUsersList (url: string, accessToken: string) {
 function getUsersListPaginationAndSort (url: string, accessToken: string, start: number, count: number, sort: string, search?: string) {
   const path = '/api/v1/users'
 
+  const query = {
+    start,
+    count,
+    sort,
+    search
+  }
+
   return request(url)
           .get(path)
-          .query({ start })
-          .query({ count })
-          .query({ sort })
-          .query({ search })
+          .query(query)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer ' + accessToken)
           .expect(200)
@@ -315,13 +323,16 @@ function askSendVerifyEmail (url: string, email: string) {
   })
 }
 
-function verifyEmail (url: string, userId: number, verificationString: string, statusCodeExpected = 204) {
+function verifyEmail (url: string, userId: number, verificationString: string, isPendingEmail = false, statusCodeExpected = 204) {
   const path = '/api/v1/users/' + userId + '/verify-email'
 
   return makePostBodyRequest({
     url,
     path,
-    fields: { verificationString },
+    fields: {
+      verificationString,
+      isPendingEmail
+    },
     statusCodeExpected
   })
 }

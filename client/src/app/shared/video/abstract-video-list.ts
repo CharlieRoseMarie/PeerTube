@@ -12,14 +12,14 @@ import { Syndication } from '@app/shared/video/syndication.model'
 import { Notifier, ServerService } from '@app/core'
 import { DisableForReuseHook } from '@app/core/routing/disable-for-reuse-hook'
 import { I18n } from '@ngx-translate/i18n-polyfill'
-import { isThisMonth, isThisWeek, isToday, isYesterday } from '@shared/core-utils/miscs/date'
+import { isLastMonth, isLastWeek, isToday, isYesterday } from '@shared/core-utils/miscs/date'
 
 enum GroupDate {
   UNKNOWN = 0,
   TODAY = 1,
   YESTERDAY = 2,
-  THIS_WEEK = 3,
-  THIS_MONTH = 4,
+  LAST_WEEK = 3,
+  LAST_MONTH = 4,
   OLDER = 5
 }
 
@@ -84,8 +84,8 @@ export abstract class AbstractVideoList implements OnInit, OnDestroy, DisableFor
       [GroupDate.UNKNOWN]: null,
       [GroupDate.TODAY]: this.i18n('Today'),
       [GroupDate.YESTERDAY]: this.i18n('Yesterday'),
-      [GroupDate.THIS_WEEK]: this.i18n('This week'),
-      [GroupDate.THIS_MONTH]: this.i18n('This month'),
+      [GroupDate.LAST_WEEK]: this.i18n('Last week'),
+      [GroupDate.LAST_MONTH]: this.i18n('Last month'),
       [GroupDate.OLDER]: this.i18n('Older')
     }
 
@@ -167,31 +167,41 @@ export abstract class AbstractVideoList implements OnInit, OnDestroy, DisableFor
     for (const video of this.videos) {
       const publishedDate = video.publishedAt
 
-      if (currentGroupedDate < GroupDate.TODAY && isToday(publishedDate)) {
+      if (currentGroupedDate <= GroupDate.TODAY && isToday(publishedDate)) {
+        if (currentGroupedDate === GroupDate.TODAY) continue
+
         currentGroupedDate = GroupDate.TODAY
         this.groupedDates[ video.id ] = currentGroupedDate
         continue
       }
 
-      if (currentGroupedDate < GroupDate.YESTERDAY && isYesterday(publishedDate)) {
+      if (currentGroupedDate <= GroupDate.YESTERDAY && isYesterday(publishedDate)) {
+        if (currentGroupedDate === GroupDate.YESTERDAY) continue
+
         currentGroupedDate = GroupDate.YESTERDAY
         this.groupedDates[ video.id ] = currentGroupedDate
         continue
       }
 
-      if (currentGroupedDate < GroupDate.THIS_WEEK && isThisWeek(publishedDate)) {
-        currentGroupedDate = GroupDate.THIS_WEEK
+      if (currentGroupedDate <= GroupDate.LAST_WEEK && isLastWeek(publishedDate)) {
+        if (currentGroupedDate === GroupDate.LAST_WEEK) continue
+
+        currentGroupedDate = GroupDate.LAST_WEEK
         this.groupedDates[ video.id ] = currentGroupedDate
         continue
       }
 
-      if (currentGroupedDate < GroupDate.THIS_MONTH && isThisMonth(publishedDate)) {
-        currentGroupedDate = GroupDate.THIS_MONTH
+      if (currentGroupedDate <= GroupDate.LAST_MONTH && isLastMonth(publishedDate)) {
+        if (currentGroupedDate === GroupDate.LAST_MONTH) continue
+
+        currentGroupedDate = GroupDate.LAST_MONTH
         this.groupedDates[ video.id ] = currentGroupedDate
         continue
       }
 
-      if (currentGroupedDate < GroupDate.OLDER) {
+      if (currentGroupedDate <= GroupDate.OLDER) {
+        if (currentGroupedDate === GroupDate.OLDER) continue
+
         currentGroupedDate = GroupDate.OLDER
         this.groupedDates[ video.id ] = currentGroupedDate
       }

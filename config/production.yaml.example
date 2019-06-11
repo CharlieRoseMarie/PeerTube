@@ -54,6 +54,12 @@ smtp:
   ca_file: null # Used for self signed certificates
   from_address: 'admin@example.com'
 
+email:
+  body:
+    signature: "PeerTube"
+  object:
+    prefix: "[PeerTube]"
+
 # From the project root directory
 storage:
   tmp: '/var/www/peertube/storage/tmp/' # Used to download data (imports etc), store uploaded files before processing...
@@ -70,6 +76,8 @@ storage:
 
 log:
   level: 'info' # debug/info/warning/error
+  rotation:
+    enabled : true
 
 search:
   # Add ability to fetch remote videos/actors by their URI, that may not be federated with your instance
@@ -197,6 +205,7 @@ transcoding:
     480p: false
     720p: false
     1080p: false
+    2160p: false
   # /!\ EXPERIMENTAL /!\
   # /!\ Requires ffmpeg >= 4
   # Generate HLS playlists and fragmented MP4 files. Better playback than with WebTorrent:
@@ -247,8 +256,6 @@ instance:
     "# If you would like to report a security issue\n# you may report it to:\nContact: https://github.com/Chocobozzz/PeerTube/blob/develop/SECURITY.md\nContact: mailto:"
 
 services:
-  # You can provide a reporting endpoint for Content Security Policy violations
-  csp-logger:
   # Cards configuration to format video in Twitter
   twitter:
     username: '@Chocobozzz' # Indicates the Twitter account for the website or platform on which the content was published
